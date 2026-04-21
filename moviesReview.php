@@ -34,29 +34,6 @@ $list_of_reviews = getReviewsbyMID(6);
 
 
 
-<form method="POST" action="">
-     
-    <pre>
-        User(optional): 
-        <input type="text" name="user_to_search">
-    </pre>
-    
-
-    <pre>
-        See: 
-        <input type="radio" name="byUser"
-                value="Show Reviews by User">Show Reviews by User
-        
-        <input type="radio" name="allReviews"
-                value="See All Reviews">See All Reviews
-    </pre>
-     
-
-    <input type="submit" value="Show Reviews">
- 
-</form>
-
-
 <!-- from POTD code for list of visitors table -->
 <hr/>
 <div class="container">
@@ -71,6 +48,7 @@ $list_of_reviews = getReviewsbyMID(6);
   </tr>
   </thead>
 
+  <form method="POST" action="">
   <pre>
         See: 
         <input type="radio" name="byUser"
@@ -78,7 +56,13 @@ $list_of_reviews = getReviewsbyMID(6);
         
         <input type="radio" name="allReviews"
                 value="See All Reviews">See All Reviews
+
+            
     </pre>
+    <input type="submit" value="Show Reviews">
+    </form>
+
+    
 
   <!-- iterate array of results, display the existing visitor information -->
   <?php foreach ($list_of_reviews as $row): ?>
