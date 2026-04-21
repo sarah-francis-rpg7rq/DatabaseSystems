@@ -26,6 +26,8 @@ require("netflix-db.php");
 //testing 6 for now but it should get the MID from the previous page
 $list_of_reviews = getReviewsbyMID(6);
 
+//$list_of_reviews = getReviewsbyMID_username(6,'amy');
+//this is just to see if the function by username worked I havent worked on the filter button yet
 ?>
 
 
