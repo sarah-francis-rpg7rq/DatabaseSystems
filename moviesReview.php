@@ -2,6 +2,7 @@
 
 <?php
 require("connect-db.php");   
+require("header.php");  
 require("netflix-db.php");   
 
 //https://www.geeksforgeeks.org/php/how-to-pass-form-variables-from-one-page-to-other-page-in-php/
@@ -69,6 +70,15 @@ $list_of_reviews = getReviewsbyMID(6);
     <th><b>Review</b></th>
   </tr>
   </thead>
+
+  <pre>
+        See: 
+        <input type="radio" name="byUser"
+                value="Show Reviews by User">Show Reviews by User
+        
+        <input type="radio" name="allReviews"
+                value="See All Reviews">See All Reviews
+    </pre>
 
   <!-- iterate array of results, display the existing visitor information -->
   <?php foreach ($list_of_reviews as $row): ?>
