@@ -50,21 +50,31 @@ $list_of_reviews = getReviewsbyMID(6);
 
   <form method="POST" action="">
   <pre>
-        See: 
-        <input type="radio" name="byUser"
-                value="Show Reviews by User">Show Reviews by User
-        
-        <input type="radio" name="allReviews"
-                value="See All Reviews">See All Reviews
-
-            
+        User: 
+        <input type="text" name="user_to_search">
     </pre>
-    <input type="submit" value="Show Reviews">
+  
+    <input type="submit" value="Filter Reviews by User">
     </form>
+
+    <?php 
+    $list_of_reviews = getReviewsbyMID(6); //still just using jaws as default input until the other page is done 
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
+        $user = trim($_POST['user_to_search']);
+        // filter by user if there was an input
+        if (!empty($user)) {
+            $list_of_reviews = getReviewsbyMID_username(6, $user);
+        }
+    }
+
+ 
+    ?>
 
     
 
-  <!-- iterate array of results, display the existing visitor information -->
+  <!-- iterate through review results -->
   <?php foreach ($list_of_reviews as $row): ?>
   <tr>
      <td><?php echo $row['username']; ?> </td>
@@ -74,7 +84,7 @@ $list_of_reviews = getReviewsbyMID(6);
      
   </tr>
   <?php endforeach; ?>
-  <!-- end loop -->
+
 
 </table>
 </div>
