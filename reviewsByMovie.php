@@ -20,12 +20,27 @@ require("netflix-db.php");
 //get movie selected from previous page
 //$_SESSION['movie_selected']
       //  = $_POST['movie_selected'];
+     
+      //for now I am testing with MID=6
 
+$MID=6;
 
+echo "here";
 
 
 //testing 6 for now but it should get the MID from the previous page
-$list_of_reviews = getReviewsbyMID(6);
+$list_of_reviews = getReviewsbyMID($MID);
+$limit = 1;
+
+//if (isset($_GET["page"])){
+ //   $pn = ($_GET["page"]);
+//}
+//else{
+        $pn=1;
+//};
+
+
+$start_from = ($pn -1) *$limit;
 
 //$list_of_reviews = getReviewsbyMID_username(6,'amy');
 //this is just to see if the function by username worked I havent worked on the filter button yet
@@ -58,7 +73,13 @@ $list_of_reviews = getReviewsbyMID(6);
     </form>
 
     <?php 
-    $list_of_reviews = getReviewsbyMID(6); //still just using jaws as default input until the other page is done 
+    
+
+    echo "here2";
+
+    //default=not filtering by user
+    $list_of_reviews = getReviewsbyMID($MID); 
+    $num_reviews = getCountReviews($MID); 
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
@@ -66,8 +87,15 @@ $list_of_reviews = getReviewsbyMID(6);
         // filter by user if there was an input
         if (!empty($user)) {
             $list_of_reviews = getReviewsbyMID_username(6, $user);
+            $num_reviews = getCountReviews($MID,$user);
+           
+
         }
     }
+
+    $total_pages=ceil($num_reviews[0]['review_count']/$limit);
+    $page_link="";
+    //from geeks for geeks pagination article:https://www.geeksforgeeks.org/php/php-pagination-set-2/
 
  
     ?>
@@ -83,11 +111,32 @@ $list_of_reviews = getReviewsbyMID(6);
 
      
   </tr>
-  <?php endforeach; ?>
+  <?php endforeach; 
+
+  ?>
 
 
 </table>
 </div>
+
+<?php
+
+
+$total_pages=ceil($num_reviews[0]['review_count']/$limit);
+$page_link="";
+//from geeks for geeks pagination article:https://www.geeksforgeeks.org/php/php-pagination-set-2/
+
+for ($i=1; $i<=$total_pages; $i++) {
+    if($i==$pn) 
+      $pagLink .= "<li class='active'><a href='reviewsByMovie.php?page=
+                                      ".$i."'>".$i."</a></li>";
+    else
+      $pagLink .= "<li><a href='reviewsByMovie.php?page=".$i."'>
+                                          ".$i."</a></li>";  
+  };  
+  echo $pagLink;
+
+?>
 
 
 </body>
