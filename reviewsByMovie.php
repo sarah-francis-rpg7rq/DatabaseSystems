@@ -23,27 +23,23 @@ require("netflix-db.php");
      
       //for now I am testing with MID=6
 
-$MID=6;
+$MID=1;
 
-echo "here";
+$limit = 2;
 
 
-//testing 6 for now but it should get the MID from the previous page
-$list_of_reviews = getReviewsbyMID($MID);
-$limit = 1;
-
-//if (isset($_GET["page"])){
- //   $pn = ($_GET["page"]);
-//}
-//else{
+if (isset($_GET["page"])){
+    $pn = ($_GET["page"]);
+}
+else{
         $pn=1;
-//};
+};
+
 
 
 $start_from = ($pn -1) *$limit;
 
-//$list_of_reviews = getReviewsbyMID_username(6,'amy');
-//this is just to see if the function by username worked I havent worked on the filter button yet
+
 ?>
 
 
@@ -75,23 +71,26 @@ $start_from = ($pn -1) *$limit;
     <?php 
     
 
-    echo "here2";
+    
 
     //default=not filtering by user
-    $list_of_reviews = getReviewsbyMID($MID); 
+    $list_of_reviews = getReviewsbyMID($MID,$limit,$start_from); 
     $num_reviews = getCountReviews($MID); 
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
         $user = trim($_POST['user_to_search']);
         // filter by user if there was an input
         if (!empty($user)) {
-            $list_of_reviews = getReviewsbyMID_username(6, $user);
+           
+            $list_of_reviews = getReviewsbyMID_username(1, $user,$limit, $start_from);
+          
             $num_reviews = getCountReviews($MID,$user);
            
 
         }
     }
+
+  
 
     $total_pages=ceil($num_reviews[0]['review_count']/$limit);
     $page_link="";
@@ -101,6 +100,7 @@ $start_from = ($pn -1) *$limit;
     ?>
 
     
+
 
   <!-- iterate through review results -->
   <?php foreach ($list_of_reviews as $row): ?>
