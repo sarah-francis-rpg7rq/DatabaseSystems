@@ -1,10 +1,10 @@
 <?php
 
 
-function getReviewsbyMID($MID)
+function getReviewsbyMID($MID, $limit_num,$offset_num)
 {
     global $db;
-
+  
     //from milestone code
     $query = "SELECT r.RID, u.username, m.title, r.rating, r.review_text 
     FROM review r
@@ -12,13 +12,15 @@ function getReviewsbyMID($MID)
     JOIN users u ON wr.UID = u.UID
     JOIN movieHasReview mhr ON r.RID = mhr.RID
     JOIN movie m ON mhr.MID = m.MID
-    WHERE m.MID=:MID"; //added this to search by a specific movie 
+    WHERE m.MID=:MID
+    LIMIT :limit_num OFFSET :offset_num "; //added this to search by a specific movie 
 
 
-    
     $statement = $db->prepare($query);    
     $statement->bindValue(':MID', $MID);
-    $statement->execute();              
+    $statement->bindValue(':limit_num', $limit_num, PDO::PARAM_INT);
+    $statement->bindValue(':offset_num', $offset_num,PDO::PARAM_INT);
+    $statement->execute();             
     $result = $statement->fetchAll();     
     $statement->closeCursor();
     return $result;
@@ -26,7 +28,7 @@ function getReviewsbyMID($MID)
 }
 
 
-function getReviewsbyMID_username($MID,$user)
+function getReviewsbyMID_username($MID,$user, $limit_num,$offset_num)
 {
     global $db;
 
@@ -38,13 +40,16 @@ function getReviewsbyMID_username($MID,$user)
     JOIN movieHasReview mhr ON r.RID = mhr.RID
     JOIN movie m ON mhr.MID = m.MID
     WHERE m.MID=:MID
-    AND u.username=:username";//and filter by user
+    AND u.username=:username
+    LIMIT :limit_num OFFSET :offset_num";//and filter by user
 
 
     
     $statement = $db->prepare($query);    
     $statement->bindValue(':MID', $MID);
     $statement->bindValue(':username', $user);
+    $statement->bindValue(':limit_num', $limit_num, PDO::PARAM_INT);
+    $statement->bindValue(':offset_num', $offset_num,PDO::PARAM_INT);
     $statement->execute();              
     $result = $statement->fetchAll();     
     $statement->closeCursor();
@@ -67,14 +72,14 @@ function getCountReviews($MID,$user=-1)
         JOIN movieHasReview mhr ON r.RID = mhr.RID
         JOIN movie m ON mhr.MID = m.MID
         WHERE m.MID=:MID
-        AND u.username=:username";// filter by user
+        AND u.username=:username ";// filter by user
     }
     else{
         $query = "SELECT COUNT(r.RID) AS review_count
         FROM review r
         JOIN movieHasReview mhr ON r.RID = mhr.RID
         JOIN movie m ON mhr.MID = m.MID
-        WHERE m.MID=:MID";//no filter by user
+        WHERE m.MID=:MID ";//no filter by user
     }
    
 
