@@ -61,11 +61,11 @@ $start_from = ($pn -1) *$limit;
 
   <form method="POST" action="">
   <pre>
-        User: 
+        Filter By Username: 
         <input type="text" name="user_to_search">
     </pre>
   
-    <input type="submit" value="Filter Reviews by User">
+    <input type="submit" value="See Reviews">
     </form>
 
     <?php 
