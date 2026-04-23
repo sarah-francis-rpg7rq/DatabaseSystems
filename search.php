@@ -3,6 +3,7 @@ require_once __DIR__ . '/connect-db.php';
 require_once __DIR__ . '/netflix-db.php';
 
 session_start();
+$isAdmin = (($_SESSION['role'] ?? '') === 'admin');
 
 $allowedSorts = ['title_asc', 'title_desc', 'year_asc', 'year_desc', 'rating_desc', 'rating_asc'];
 $sort = $_GET['sort'] ?? 'title_asc';
@@ -81,9 +82,6 @@ require_once __DIR__ . '/app-shell-begin.php';
   <?php if (!empty($filters['cid'])): ?>
     <input type="hidden" name="cid" value="<?php echo h((string) $filters['cid']); ?>">
   <?php endif; ?>
-<?php if ($_SESSION['role'] === 'admin'): ?>
-    <a href="admin.php">Go to Admin Panel</a>
-<?php endif; ?>
   <div class="flex-grow-1" style="min-width: 200px;">
     <label class="visually-hidden" for="searchQ">Search the database by title</label>
     <input id="searchQ" type="search" name="q" value="<?php echo h($filters['q']); ?>"
@@ -115,6 +113,9 @@ require_once __DIR__ . '/app-shell-begin.php';
   <button class="btn toolbar-btn-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
     Add Filter
   </button>
+  <?php if ($isAdmin): ?>
+    <a class="btn toolbar-btn-white d-flex align-items-center" href="admin.php">Admin Panel</a>
+  <?php endif; ?>
   <button type="submit" class="visually-hidden" tabindex="-1">Search</button>
 </form>
 

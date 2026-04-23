@@ -9,10 +9,9 @@ $toastClass = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
     // Prepare and execute
-    $stmt = $db->prepare("SELECT UID, username, password_hash, role FROM Users WHERE       username = :username");
+    $stmt = $db->prepare("SELECT UID, username, password_hash, role FROM users WHERE username = :username");
     $stmt->execute([':username' => $username]);
 
     $user = $stmt->fetch(PDO::FETCH_ASSOC);

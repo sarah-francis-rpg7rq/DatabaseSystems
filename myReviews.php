@@ -1,8 +1,10 @@
 <?php
 session_start();
 require_once __DIR__ . '/connect-db.php';
+require_once __DIR__ . '/netflix-db.php';
 
 $prefill_movie = '';
+$prefill_mid = 0;
 if (isset($_GET['for_mid'])) {
     $forMid = (int) $_GET['for_mid'];
     if ($forMid > 0) {
@@ -11,11 +13,13 @@ if (isset($_GET['for_mid'])) {
         $prow = $ps->fetch(PDO::FETCH_ASSOC);
         if ($prow) {
             $prefill_movie = $prow['title'];
+            $prefill_mid = $forMid;
         }
     }
 }
 
-$username = "sarah"; // later replace with: $username = $_SESSION['username'];
+$username = isset($_SESSION['username']) ? trim((string) $_SESSION['username']) : "sarah";
+$review_error = '';
 
 $edit_review = null; //variable to holh review being edited 
 
@@ -23,9 +27,10 @@ $edit_review = null; //variable to holh review being edited
 if (isset($_POST['delete_id'])) {
     $rid = $_POST['delete_id'];
 
-    //delete review from database
-    $stmt = $db->prepare("DELETE FROM review WHERE RID = ?");
-    $stmt->execute([$rid]);
+    $del = db_delete_review_linked($db, $rid);
+    if (!$del['ok']) {
+        $review_error = $del['error'] ?? 'Delete failed.';
+    }
 }
 
 //loading review into edit form
@@ -55,9 +60,11 @@ if (isset($_POST['add_review'])) {
     $rating = $_POST['rating'];
     $review_text = $_POST['review_text'];
 
-    //insert new review into the table
-    $stmt = $db->prepare("INSERT INTO review (username, movie, rating, review_text) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$username, $movie, $rating, $review_text]);
+    $movie_mid = isset($_POST['movie_mid']) ? (int) $_POST['movie_mid'] : 0;
+    $res = db_add_review_linked($db, $username, $movie, $rating, $review_text, $movie_mid);
+    if (!$res['ok']) {
+        $review_error = $res['error'] ?? 'Could not add review.';
+    }
 }
 
 //fetching all the reviews for this user
@@ -77,7 +84,10 @@ require_once __DIR__ . '/app-shell-begin.php';
 <!-- add review form -->
 <form method="POST" action="">
     <p>
-        Movie: <input type="text" name="movie" required value="<?php echo h($prefill_movie); ?>">
+        <?php if ($prefill_mid > 0): ?>
+            <input type="hidden" name="movie_mid" value="<?php echo (int) $prefill_mid; ?>">
+        <?php endif; ?>
+        Movie: <input type="text" name="movie" required value="<?php echo h($prefill_movie); ?>" <?php echo $prefill_mid > 0 ? 'readonly' : ''; ?>>
     </p>
     <p>
         Rating (1-5): <input type="number" name="rating" min="1" max="5" required>
@@ -87,6 +97,10 @@ require_once __DIR__ . '/app-shell-begin.php';
     </p>
     <input type="submit" name="add_review" value="Add Review">
 </form>
+
+<?php if ($review_error !== ''): ?>
+  <p style="color:#ff4d4d;"><strong><?php echo h($review_error); ?></strong></p>
+<?php endif; ?>
 
 <!-- edit review form (only shows if edit button is clicked) -->
 <?php if ($edit_review): ?>
