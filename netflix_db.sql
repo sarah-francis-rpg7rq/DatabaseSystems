@@ -18201,7 +18201,8 @@ DELIMITER ;
 CREATE TABLE `users` (
   `UID` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL
+  `password_hash` VARCHAR(255) NOT NULL
+  `role` ENUM(`use`, `admin`) DEFAULT `user`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
