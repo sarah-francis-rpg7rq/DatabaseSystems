@@ -2,6 +2,8 @@
 require_once __DIR__ . '/connect-db.php';
 require_once __DIR__ . '/netflix-db.php';
 
+session_start();
+
 $allowedSorts = ['title_asc', 'title_desc', 'year_asc', 'year_desc', 'rating_desc', 'rating_asc'];
 $sort = $_GET['sort'] ?? 'title_asc';
 if (!in_array($sort, $allowedSorts, true)) {
@@ -79,6 +81,9 @@ require_once __DIR__ . '/app-shell-begin.php';
   <?php if (!empty($filters['cid'])): ?>
     <input type="hidden" name="cid" value="<?php echo h((string) $filters['cid']); ?>">
   <?php endif; ?>
+<?php if ($_SESSION['role'] === 'admin'): ?>
+    <a href="admin.php">Go to Admin Panel</a>
+<?php endif; ?>
   <div class="flex-grow-1" style="min-width: 200px;">
     <label class="visually-hidden" for="searchQ">Search the database by title</label>
     <input id="searchQ" type="search" name="q" value="<?php echo h($filters['q']); ?>"
