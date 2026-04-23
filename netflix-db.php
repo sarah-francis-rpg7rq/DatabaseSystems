@@ -301,4 +301,104 @@ function reviews_movie_query_string($mid, $page, $user = '')
     return http_build_query($q);
 }
 
+function db_get_uid_for_username(PDO $db, $username)
+{
+    $st = $db->prepare('SELECT UID FROM users WHERE username = ? LIMIT 1');
+    $st->execute([(string) $username]);
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+    return $row ? (int) $row['UID'] : null;
+}
+
+/**
+ * Insert review + writesReview + movieHasReview so movieRating triggers run.
+ *
+ * @param int $midKnown When > 0, use this MID (preferred).
+ * @return array{ok: bool, error?: string, rid?: int}
+ */
+function db_add_review_linked(PDO $db, $username, $movieTitleInput, $rating, $reviewText, $midKnown = 0)
+{
+    $uid = db_get_uid_for_username($db, $username);
+    if ($uid === null) {
+        return ['ok' => false, 'error' => 'User not found. Please register/login first.'];
+    }
+
+    $rating = (int) $rating;
+    if ($rating < 1 || $rating > 5) {
+        return ['ok' => false, 'error' => 'Rating must be between 1 and 5.'];
+    }
+    $reviewText = trim((string) $reviewText);
+    if ($reviewText === '') {
+        return ['ok' => false, 'error' => 'Review text is required.'];
+    }
+
+    if ((int) $midKnown > 0) {
+        $st = $db->prepare('SELECT MID, title FROM movie WHERE MID = ? LIMIT 1');
+        $st->execute([(int) $midKnown]);
+        $m = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$m) {
+            return ['ok' => false, 'error' => 'Movie not found in catalog.'];
+        }
+        $mid = (int) $m['MID'];
+        $movieTitle = (string) $m['title'];
+    } else {
+        $t = trim((string) $movieTitleInput);
+        if ($t === '') {
+            return ['ok' => false, 'error' => 'Movie title is required.'];
+        }
+        // Exact match to avoid accidentally linking wrong title.
+        $st = $db->prepare('SELECT MID, title FROM movie WHERE title = ? ORDER BY MID ASC LIMIT 1');
+        $st->execute([$t]);
+        $m = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$m) {
+            return ['ok' => false, 'error' => 'No exact title match in catalog. Use Search page “+” to link a movie.'];
+        }
+        $mid = (int) $m['MID'];
+        $movieTitle = (string) $m['title'];
+    }
+
+    try {
+        $db->beginTransaction();
+        $ins = $db->prepare('INSERT INTO review (username, movie, rating, review_text) VALUES (?, ?, ?, ?)');
+        $ins->execute([(string) $username, $movieTitle, $rating, $reviewText]);
+        $rid = (int) $db->lastInsertId();
+
+        $db->prepare('INSERT INTO writesReview (UID, RID) VALUES (?, ?)')->execute([$uid, $rid]);
+        $db->prepare('INSERT INTO movieHasReview (MID, RID) VALUES (?, ?)')->execute([$mid, $rid]);
+
+        $db->commit();
+        return ['ok' => true, 'rid' => $rid];
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        return ['ok' => false, 'error' => 'Database error while saving review.'];
+    }
+}
+
+/**
+ * Delete review and junction rows in FK-safe order.
+ *
+ * @return array{ok: bool, error?: string}
+ */
+function db_delete_review_linked(PDO $db, $rid)
+{
+    $rid = (int) $rid;
+    if ($rid < 1) {
+        return ['ok' => false, 'error' => 'Invalid review id.'];
+    }
+    try {
+        $db->beginTransaction();
+        $db->prepare('DELETE FROM movieHasReview WHERE RID = ?')->execute([$rid]);
+        $db->prepare('DELETE FROM writesReview WHERE RID = ?')->execute([$rid]);
+        $db->prepare('DELETE FROM review WHERE RID = ?')->execute([$rid]);
+        $db->commit();
+        return ['ok' => true];
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        return ['ok' => false, 'error' => 'Database error while deleting review.'];
+    }
+}
+
 ?>

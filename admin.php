@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     die("Access denied. Admins only.");
 }
 
-$stmt = $db->query("SELECT UID, username, role FROM Users");
+$stmt = $db->query("SELECT UID, username, role FROM users");
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 

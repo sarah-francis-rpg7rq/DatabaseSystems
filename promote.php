@@ -10,7 +10,7 @@ if ($_SESSION['role'] !== 'admin') {
 $user_id = $_POST['user_id'] ?? null;
 
 if ($user_id) {
-    $stmt = $db->prepare("UPDATE Users SET role = 'admin' WHERE UID = :id");
+    $stmt = $db->prepare("UPDATE users SET role = 'admin' WHERE UID = :id");
     $stmt->bindParam(':id', $user_id);
     $stmt->execute();
 }
