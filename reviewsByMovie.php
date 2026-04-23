@@ -43,13 +43,35 @@ $start_from = ($pn -1) *$limit;
 ?>
 
 
+<html>
+<head>
+  <style>
+    th {
+      text-align: left;
+    }
+  </style>
+  <meta charset="utf-8">    
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
+  <title> <?php echo $MID; ?> </title>
+
+</head>
+<body class="bg-dark">
+
+
+<div class="container">
+  <div class="row g-3 mt-2">
+    <div class="col">
+      <h1 style=" color: red;"> MID-will change this to movie title soon<?php echo $MID; ?> </h1>
+    </div>  
+  </div>
 
 <!-- from POTD code for list of visitors table -->
 <hr/>
-<div class="container">
-<h3>Reviews for (Movie Name would go here)</h3>
-<div class="row justify-content-center">
+<div class="container bg-white p4 display:flex">
+<h3>Reviews </h3>
+<div >
 <table class="w3-table w3-bordered w3-card-4 center" style="width:100%">
   <thead>
   <tr style="background-color:#B0B0B0">
@@ -60,10 +82,16 @@ $start_from = ($pn -1) *$limit;
   </thead>
 
   <form method="POST" action="">
-  <pre>
-        Filter By Username: 
-        <input type="text" name="user_to_search">
-    </pre>
+  
+
+    <div class=" d-flex gap-2 align-items-center">
+  
+         Username:
+         <input type='text' class='form-control' id='user_to_search' name='user_to_search'
+                />
+
+         <button type="submit" value="Filter by User">
+     </div>
   
     <input type="submit" value="See Reviews">
     </form>
