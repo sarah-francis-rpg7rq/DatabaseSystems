@@ -34,5 +34,10 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </td>
 </tr>
 <?php endforeach; ?>
+<<div class="col mb-2 mt-4">
+                <p class="text-center" 
+                  style="font-weight: 600; color: navy;"
+                  ><a href="./search.php"
+                        style="text-decoration: none;">Back to Dashboard</a>
+            </div>
 </table>
-?>
