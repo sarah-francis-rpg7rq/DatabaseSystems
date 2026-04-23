@@ -1,172 +1,156 @@
-<!DOCTYPE html>
-
 <?php
-require("connect-db.php");   
-require("header.php");  
-require("netflix-db.php");   
+require_once __DIR__ . '/connect-db.php';
+require_once __DIR__ . '/netflix-db.php';
 
-//https://www.geeksforgeeks.org/php/how-to-pass-form-variables-from-one-page-to-other-page-in-php/
+$mid = isset($_GET['mid']) ? (int) $_GET['mid'] : 0;
+$movie = $mid > 0 ? getMovieByMid($db, $mid) : null;
 
-// Initialize the session
-//session_start();
-     
-// Store the submitted data sent
-// via POST method, stored 
-
-// Temporarily in $_POST structure.
-//get user from previous page
-//$_SESSION['user'] = $_POST['user_name'];
-
-//get movie selected from previous page
-//$_SESSION['movie_selected']
-      //  = $_POST['movie_selected'];
-     
-      //for now I am testing with MID=6
-
-$MID=1;
-
-$limit = 2;
-
-
-if (isset($_GET["page"])){
-    $pn = ($_GET["page"]);
+if (!$movie) {
+    $activeNav = '';
+    $pageTitle = 'Movie not found';
+    require_once __DIR__ . '/app-shell-begin.php';
+    echo '<p class="text-secondary">No movie exists for that link. <a href="search.php" class="link-light">Back to search</a></p>';
+    require_once __DIR__ . '/app-shell-end.php';
+    exit;
 }
-else{
-        $pn=1;
-};
 
+$MID = (int) $movie['MID'];
+$limit = 10;
 
+$userFilter = isset($_GET['user']) ? trim((string) $_GET['user']) : '';
 
-$start_from = ($pn -1) *$limit;
+$pn = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+$start_from = ($pn - 1) * $limit;
 
+if ($userFilter !== '') {
+    $list_of_reviews = getReviewsbyMID_username($MID, $userFilter, $limit, $start_from);
+    $num_reviews = getCountReviews($MID, $userFilter);
+} else {
+    $list_of_reviews = getReviewsbyMID($MID, $limit, $start_from);
+    $num_reviews = getCountReviews($MID);
+}
 
+$countVal = isset($num_reviews[0]['review_count']) ? (int) $num_reviews[0]['review_count'] : 0;
+$total_pages = max(1, (int) ceil($countVal / $limit));
+
+if ($pn > $total_pages) {
+    $pn = $total_pages;
+    $start_from = ($pn - 1) * $limit;
+    if ($userFilter !== '') {
+        $list_of_reviews = getReviewsbyMID_username($MID, $userFilter, $limit, $start_from);
+    } else {
+        $list_of_reviews = getReviewsbyMID($MID, $limit, $start_from);
+    }
+}
+
+$activeNav = '';
+$pageTitle = $movie['title'] . ' — Reviews';
+require_once __DIR__ . '/app-shell-begin.php';
 ?>
 
-
-<html>
-<head>
-  <style>
-    th {
-      text-align: left;
-    }
-  </style>
-  <meta charset="utf-8">    
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <title> <?php echo $MID; ?> </title>
-
-</head>
-<body class="bg-dark">
-
-
-<div class="container">
-  <div class="row g-3 mt-2">
-    <div class="col">
-      <h1 style=" color: red;"> MID-will change this to movie title soon<?php echo $MID; ?> </h1>
-    </div>  
-  </div>
-
-<!-- from POTD code for list of visitors table -->
-<hr/>
-<div class="container bg-white p4 display:flex">
-<h3>Reviews </h3>
-<div >
-<table class="w3-table w3-bordered w3-card-4 center" style="width:100%">
-  <thead>
-  <tr style="background-color:#B0B0B0">
-    <th><b>user</b></th>
-    <th><b>Rating</b></th>
-    <th><b>Review</b></th>
-  </tr>
-  </thead>
-
-  <form method="POST" action="">
-  
-
-    <div class=" d-flex gap-2 align-items-center">
-  
-         Username:
-         <input type='text' class='form-control' id='user_to_search' name='user_to_search'
-                />
-
-         <button type="submit" value="Filter by User">
-     </div>
-  
-    <input type="submit" value="See Reviews">
-    </form>
-
-    <?php 
-    
-
-    
-
-    //default=not filtering by user
-    $list_of_reviews = getReviewsbyMID($MID,$limit,$start_from); 
-    $num_reviews = getCountReviews($MID); 
-
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $user = trim($_POST['user_to_search']);
-        // filter by user if there was an input
-        if (!empty($user)) {
-           
-            $list_of_reviews = getReviewsbyMID_username(1, $user,$limit, $start_from);
-          
-            $num_reviews = getCountReviews($MID,$user);
-           
-
-        }
-    }
-
-  
-
-    $total_pages=ceil($num_reviews[0]['review_count']/$limit);
-    $page_link="";
-    //from geeks for geeks pagination article:https://www.geeksforgeeks.org/php/php-pagination-set-2/
-
- 
-    ?>
-
-    
-
-
-  <!-- iterate through review results -->
-  <?php foreach ($list_of_reviews as $row): ?>
-  <tr>
-     <td><?php echo $row['username']; ?> </td>
-     <td><?php echo $row['rating']; ?></td>
-     <td><?php echo $row['review_text']; ?></td>
-
-     
-  </tr>
-  <?php endforeach; 
-
-  ?>
-
-
-</table>
+<div class="mb-3">
+  <a href="search.php" class="link-secondary text-decoration-none small">← Back to search</a>
 </div>
 
-<?php
+<div class="row g-3 mb-3">
+  <div class="col">
+    <h1 class="h2" style="color: #ff6b6b;"><?php echo h($movie['title']); ?></h1>
+    <p class="text-secondary mb-0">
+      <?php echo h($movie['director_name']); ?> · <?php echo h((string) $movie['year']); ?>
+      · <?php echo h($movie['content_rating']); ?>
+    </p>
+  </div>
+  <div class="col-auto text-end">
+    <div class="text-white-50 small">Average rating (read-only, out of 5)</div>
+    <div class="fs-3 fw-bold text-white">
+      <?php
+      $avgDisp = format_movie_avg_rating_display($movie['avg_rating'] ?? null);
+      if ($avgDisp !== null) {
+          echo h($avgDisp) . ' / 5';
+      } else {
+          echo '—';
+      }
+      ?>
+    </div>
+  </div>
+</div>
 
+<hr class="border-secondary"/>
 
-$total_pages=ceil($num_reviews[0]['review_count']/$limit);
-$page_link="";
-//from geeks for geeks pagination article:https://www.geeksforgeeks.org/php/php-pagination-set-2/
+<div class="bg-light text-dark p-4 rounded">
+  <h3 class="h5 mb-3">Reviews</h3>
 
-for ($i=1; $i<=$total_pages; $i++) {
-    if($i==$pn) 
-      $pagLink .= "<li class='active'><a href='reviewsByMovie.php?page=
-                                      ".$i."'>".$i."</a></li>";
-    else
-      $pagLink .= "<li><a href='reviewsByMovie.php?page=".$i."'>
-                                          ".$i."</a></li>";  
-  };  
-  echo $pagLink;
+  <form method="get" action="reviewsByMovie.php" class="mb-3">
+    <input type="hidden" name="mid" value="<?php echo (int) $MID; ?>">
+    <input type="hidden" name="page" value="1">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <label for="user_to_search" class="mb-0">Filter by username</label>
+      <input type="text" class="form-control" style="max-width: 16rem;" id="user_to_search" name="user"
+             value="<?php echo h($userFilter); ?>">
+      <button type="submit" class="btn btn-dark">Apply</button>
+    </div>
+  </form>
 
-?>
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm mb-0">
+      <thead class="table-secondary">
+      <tr>
+        <th>User</th>
+        <th>Rating</th>
+        <th>Review</th>
+      </tr>
+      </thead>
+      <tbody>
+      <?php foreach ($list_of_reviews as $row): ?>
+        <tr>
+          <td><?php echo h($row['username']); ?></td>
+          <td><?php echo h((string) $row['rating']); ?></td>
+          <td><?php echo h($row['review_text']); ?></td>
+        </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
 
+  <?php if (count($list_of_reviews) === 0): ?>
+    <p class="text-muted mt-3 mb-0">No reviews yet for this title.</p>
+  <?php endif; ?>
 
-</body>
-</html>
+  <?php if ($total_pages > 1): ?>
+    <?php $reviewPageSeq = pagination_page_sequence($pn, $total_pages); ?>
+    <nav class="compact-pagination mt-3 mb-0" aria-label="Review pages">
+      <ul class="pagination pagination-sm flex-wrap justify-content-center gap-1 mb-0">
+        <li class="page-item <?php echo $pn <= 1 ? 'disabled' : ''; ?>">
+          <?php if ($pn <= 1): ?>
+            <span class="page-link">Prev</span>
+          <?php else: ?>
+            <a class="page-link" href="<?php echo h('reviewsByMovie.php?' . reviews_movie_query_string($MID, $pn - 1, $userFilter)); ?>">Prev</a>
+          <?php endif; ?>
+        </li>
+        <?php foreach ($reviewPageSeq as $item): ?>
+          <?php if ($item === null): ?>
+            <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+          <?php else: ?>
+            <li class="page-item <?php echo $item === $pn ? 'active' : ''; ?>">
+              <?php if ($item === $pn): ?>
+                <span class="page-link"><?php echo (int) $item; ?></span>
+              <?php else: ?>
+                <a class="page-link" href="<?php echo h('reviewsByMovie.php?' . reviews_movie_query_string($MID, $item, $userFilter)); ?>"><?php echo (int) $item; ?></a>
+              <?php endif; ?>
+            </li>
+          <?php endif; ?>
+        <?php endforeach; ?>
+        <li class="page-item <?php echo $pn >= $total_pages ? 'disabled' : ''; ?>">
+          <?php if ($pn >= $total_pages): ?>
+            <span class="page-link">Next</span>
+          <?php else: ?>
+            <a class="page-link" href="<?php echo h('reviewsByMovie.php?' . reviews_movie_query_string($MID, $pn + 1, $userFilter)); ?>">Next</a>
+          <?php endif; ?>
+        </li>
+      </ul>
+      <p class="text-muted text-center small mt-2 mb-0">Page <?php echo (int) $pn; ?> of <?php echo (int) $total_pages; ?></p>
+    </nav>
+  <?php endif; ?>
+</div>
 
+<?php require_once __DIR__ . '/app-shell-end.php'; ?>
