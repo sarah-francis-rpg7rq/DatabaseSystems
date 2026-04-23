@@ -13,13 +13,13 @@
                otherwise, display sign up and log in buttons -->
         
             <li class="nav-item">
-              <a class="nav-link" href="signout.php">Sign out</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="search.php">Search Movies</a>
+              <a class="nav-link" href="search.php">All Movies</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="myReviews.php">My Reviews</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="signout.php">Sign out</a>
             </li>
          
 

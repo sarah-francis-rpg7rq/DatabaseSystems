@@ -25,7 +25,7 @@ if ($user) {
             $toastClass = "bg-success";  // green
 
             // Optional redirect
-            //header("Location: dashboard.php"); Change to dashboard page when implemented
+            //header("Location: search.php"); Change to dashboard page when implemented
             exit();
 
         } else {
