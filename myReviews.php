@@ -1,9 +1,19 @@
-<!DOCTYPE html>
-
 <?php
-require("connect-db.php");
 session_start();
-require("header.php");
+require_once __DIR__ . '/connect-db.php';
+
+$prefill_movie = '';
+if (isset($_GET['for_mid'])) {
+    $forMid = (int) $_GET['for_mid'];
+    if ($forMid > 0) {
+        $ps = $db->prepare('SELECT title FROM movie WHERE MID = ? LIMIT 1');
+        $ps->execute([$forMid]);
+        $prow = $ps->fetch(PDO::FETCH_ASSOC);
+        if ($prow) {
+            $prefill_movie = $prow['title'];
+        }
+    }
+}
 
 $username = "sarah"; // later replace with: $username = $_SESSION['username'];
 
@@ -54,6 +64,10 @@ if (isset($_POST['add_review'])) {
 $stmt = $db->prepare("SELECT RID, movie, rating, review_text FROM review WHERE username = ?");
 $stmt->execute([$username]);
 $list_of_reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$activeNav = 'ratings';
+$pageTitle = 'My Ratings';
+require_once __DIR__ . '/app-shell-begin.php';
 ?>
 
 <hr/>
@@ -63,7 +77,7 @@ $list_of_reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!-- add review form -->
 <form method="POST" action="">
     <p>
-        Movie: <input type="text" name="movie" required>
+        Movie: <input type="text" name="movie" required value="<?php echo h($prefill_movie); ?>">
     </p>
     <p>
         Rating (1-5): <input type="number" name="rating" min="1" max="5" required>
@@ -142,5 +156,4 @@ $list_of_reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 </div>
 
-</body>
-</html>
+<?php require_once __DIR__ . '/app-shell-end.php'; ?>
