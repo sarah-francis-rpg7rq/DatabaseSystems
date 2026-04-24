@@ -1,9 +1,27 @@
 <?php
+session_start();
 require_once __DIR__ . '/connect-db.php';
 require_once __DIR__ . '/netflix-db.php';
 
+$isAdmin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+$review_error = '';
+
 $mid = isset($_GET['mid']) ? (int) $_GET['mid'] : 0;
 $movie = $mid > 0 ? getMovieByMid($db, $mid) : null;
+
+//admin delete review
+if (isset($_POST['delete_review_id'])) {
+    if ($isAdmin) {
+        $rid = (int) $_POST['delete_review_id'];
+
+        $del = db_delete_review_linked($db, $rid);
+        if (!$del['ok']) {
+            $review_error = $del['error'] ?? 'Delete failed.';
+        }
+    } else {
+        $review_error = 'Access denied. Admins only.';
+    }
+}
 
 if (!$movie) {
     $activeNav = '';
@@ -79,6 +97,10 @@ require_once __DIR__ . '/app-shell-begin.php';
 
 <div class="bg-light text-dark p-4 rounded">
   <h3 class="h5 mb-3">Reviews</h3>
+  
+  <?php if ($review_error !== ''): ?>
+    <p class="text-danger"><strong><?php echo h($review_error); ?></strong></p>
+  <?php endif; ?>
 
   <form method="get" action="reviewsByMovie.php" class="mb-3">
     <input type="hidden" name="mid" value="<?php echo (int) $MID; ?>">
@@ -98,6 +120,9 @@ require_once __DIR__ . '/app-shell-begin.php';
         <th>User</th>
         <th>Rating</th>
         <th>Review</th>
+        <?php if ($isAdmin): ?>
+          <th>Admin Action</th>
+        <?php endif; ?>
       </tr>
       </thead>
       <tbody>
@@ -106,6 +131,15 @@ require_once __DIR__ . '/app-shell-begin.php';
           <td><?php echo h($row['username']); ?></td>
           <td><?php echo h((string) $row['rating']); ?></td>
           <td><?php echo h($row['review_text']); ?></td>
+
+          <?php if ($isAdmin): ?>
+            <td>
+              <form method="POST" action="">
+                <input type="hidden" name="delete_review_id" value="<?php echo (int) $row['RID']; ?>">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </td>
+          <?php endif; ?>
         </tr>
       <?php endforeach; ?>
       </tbody>
