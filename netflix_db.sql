@@ -18392,7 +18392,7 @@ GRANT SELECT ON netflix_db.netflix_raw TO 'dev_user'@'localhost';
 GRANT SELECT ON netflix_db.movierating TO 'dev_user'@'localhost';
 
 -- User authentication table
-GRANT SELECT, INSERT ON netflix_db.users TO 'dev_user'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON netflix_db.users TO 'dev_user'@'localhost';
 
 -- User-generated content
 GRANT SELECT, INSERT, UPDATE, DELETE ON netflix_db.review TO 'dev_user'@'localhost';
