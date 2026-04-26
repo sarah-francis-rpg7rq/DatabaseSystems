@@ -90,7 +90,7 @@ require_once __DIR__ . '/app-shell-begin.php';
         Movie: <input type="text" name="movie" required value="<?php echo h($prefill_movie); ?>" <?php echo $prefill_mid > 0 ? 'readonly' : ''; ?>>
     </p>
     <p>
-        Rating (1-5): <input type="number" name="rating" min="1" max="5" required>
+        Rating (1-5): <input type="number" name="rating" required>
     </p>
     <p>
         Review: <input type="text" name="review_text" required>
