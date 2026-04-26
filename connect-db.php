@@ -1,8 +1,8 @@
 <?php
 //connect local 
 //do not not inlclude username in final submission i think it should be blank
- $username = 'root';
- $password = '';
+ $username = 'dev_user';
+ $password = 'password';
  $host = 'localhost:3306';
  $dbname = 'netflix_db';
  $dsn = "mysql:host=$host;dbname=$dbname";
