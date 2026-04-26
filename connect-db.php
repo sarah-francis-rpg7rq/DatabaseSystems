@@ -1,6 +1,5 @@
 <?php
 //connect local 
-//do not not inlclude username in final submission i think it should be blank
  $username = 'dev_user';
  $password = 'password';
  $host = 'localhost:3306';
