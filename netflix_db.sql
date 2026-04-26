@@ -18374,6 +18374,10 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
+-- ADD admin user
+INSERT INTO Users (username, password_hash, role)
+VALUES ('Admin', '$2y$10$QX217u9ZQeWuy0lUXVBMqOISLPnjKDi/UsUAtK.49me6tLrRf.Pva', 'admin');
+	
 -- Create restricted application user
 DROP USER IF EXISTS 'dev_user'@'localhost';
 CREATE USER 'dev_user'@'localhost' IDENTIFIED BY 'password';
