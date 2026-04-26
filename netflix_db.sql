@@ -17,6 +17,8 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
+CREATE DATABASE IF NOT EXISTS `netflix_db`;
+USE `netflix_db`;
 --
 -- Database: `netflix_db`
 --
@@ -18372,10 +18374,23 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
---Database level security
-	CREATE ROLE 'developer_role';
-GRANT SELECT ON netflix_db.Movies TO 'developer_role';
-GRANT SELECT ON netflix_db.Countries TO 'developer_role';
-GRANT SELECT ON netflix_db.Directors TO 'developer_role';
-GRANT 'developer_role' TO 'dev_user'@'localhost';
+-- Create restricted application user
+CREATE USER 'dev_user'@'localhost' IDENTIFIED BY 'password';
+
+-- Core dataset (read-only access)
+GRANT SELECT ON netflix_db.movie TO 'dev_user'@'localhost';
+GRANT SELECT ON netflix_db.country TO 'dev_user'@'localhost';
+GRANT SELECT ON netflix_db.director TO 'dev_user'@'localhost';
+GRANT SELECT ON netflix_db.directs TO 'dev_user'@'localhost';
+GRANT SELECT ON netflix_db.moviefrom TO 'dev_user'@'localhost';
+GRANT SELECT ON netflix_db.netflix_raw TO 'dev_user'@'localhost';
+GRANT SELECT ON netflix_db.movierating TO 'dev_user'@'localhost';
+
+-- User authentication table
+GRANT SELECT, INSERT ON netflix_db.users TO 'dev_user'@'localhost';
+
+-- User-generated content
+GRANT SELECT, INSERT, UPDATE, DELETE ON netflix_db.review TO 'dev_user'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON netflix_db.moviehasreview TO 'dev_user'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON netflix_db.writesreview TO 'dev_user'@'localhost';
 
