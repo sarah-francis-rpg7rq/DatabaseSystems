@@ -114,9 +114,7 @@ require_once __DIR__ . '/app-shell-begin.php';
     </p>
 
     <p>
-        Rating (1-5):
-        <input type="number" name="rating" min="1" max="5"
-               value="<?php echo $edit_review['rating']; ?>" required>
+        Rating (1-5): <input type="number" name="rating" value="<?php echo $edit_review['rating']; ?>" required>
     </p>
 
     <p>
