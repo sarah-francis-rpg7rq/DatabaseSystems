@@ -18375,6 +18375,7 @@ COMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
 -- Create restricted application user
+DROP USER IF EXISTS 'dev_user'@'localhost';
 CREATE USER 'dev_user'@'localhost' IDENTIFIED BY 'password';
 
 -- Core dataset (read-only access)
